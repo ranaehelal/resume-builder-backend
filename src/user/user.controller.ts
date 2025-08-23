@@ -3,7 +3,6 @@ import { UserService } from './user.service';
 import * as bcrypt from 'bcrypt';
 
 @Controller('users')
-//users/
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -28,17 +27,5 @@ export class UserController {
     });
 
     return { message: 'User registered successfully', user };
-  }
-  @Post('login')
-  async login(@Body() body: { email: string; password: string }) {
-    const user = await this.userService.findByEmail(body.email);
-    if (!user) {
-      throw new Error('User not found');
-    }
-    const isPasswordMatch = await bcrypt.compare(body.password, user.password);
-    if (!isPasswordMatch) {
-      throw new Error('Invalid password');
-    }
-    return { message: 'User logged in successfully', user };
   }
 }

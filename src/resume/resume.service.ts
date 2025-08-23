@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resume } from './entity/resume.entity';
-
+import { NotFoundException } from '@nestjs/common';
 @Injectable()
 export class ResumeService {
   constructor(
@@ -38,7 +38,7 @@ export class ResumeService {
     //get obj has info about update things (affected rows)
     const result = await this.resumeRepository.update(id, data);
     if (result.affected === 0) {
-      throw new Error('Resume not found');
+      throw new NotFoundException('Resume not found');
     }
     //to get updated resume
     const updatedResume = await this.findOneById(id);
