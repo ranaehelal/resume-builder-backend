@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Controller,
   Post,
@@ -35,6 +34,7 @@ export class ResumeController {
       summary?: string;
     },
   ): Promise<Resume> {
+
     const userId = req.user.id;
     const user = await this.userService.findOneById(userId);
     if (!user) throw new Error('User not found');
@@ -49,7 +49,11 @@ export class ResumeController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMyResumes(@Request() req): Promise<Resume[]> {
-    const userId = req.user.id; // Changed from req.user.userId to req.user.id
+    console.log('Get My Resumes - req.user:', req.user); // Debug log
+
+    const userId = req.user.id;
+    console.log('User ID:', userId);
+
     return this.resumeService.findByUserId(userId);
   }
 
@@ -60,13 +64,14 @@ export class ResumeController {
     const resume = await this.resumeService.findOneById(id);
     if (!resume) return null;
 
-    if (resume.user.id !== req.user.id) {
+    const userId = req.user.id; // Use consistent property name
+    if (resume.user.id !== userId) {
       throw new Error('Not authorized to access this resume');
     }
     return resume;
   }
 
-  // Update resume
+  // Update
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   async update(
@@ -77,21 +82,23 @@ export class ResumeController {
     const resume = await this.resumeService.findOneById(id);
     if (!resume) throw new Error('Resume not found');
 
-    if (resume.user.id !== req.user.id) {
+    const userId = req.user.id;
+    if (resume.user.id !== userId) {
       throw new Error('Not authorized to update this resume');
     }
 
     return this.resumeService.update(id, body);
   }
 
-  // Delete resume
+  // Delete
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Request() req, @Param('id') id: number) {
     const resume = await this.resumeService.findOneById(id);
     if (!resume) throw new Error('Resume not found');
 
-    if (resume.user.id !== req.user.id) { // Changed from req.user.userId to req.user.id
+    const userId = req.user.id;
+    if (resume.user.id !== userId) {
       throw new Error('Not authorized to delete this resume');
     }
 

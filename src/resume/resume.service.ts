@@ -1,8 +1,11 @@
+// Enhanced resume.service.ts with debugging
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resume } from './entity/resume.entity';
 import { NotFoundException } from '@nestjs/common';
+
 @Injectable()
 export class ResumeService {
   constructor(
@@ -11,20 +14,24 @@ export class ResumeService {
   ) {}
 
   async create(resume: Partial<Resume>): Promise<Resume> {
-    //obj to entity
-
     const newResume = this.resumeRepository.create(resume);
     return this.resumeRepository.save(newResume);
   }
 
-  //promise not async
-  // and return back
   async findByUserId(userId: number): Promise<Resume[]> {
-    return this.resumeRepository.find({
-      where: { user: { id: userId } },
-      //user data
-      relations: ['user'],
-    });
+    console.log('Finding resumes for userId:', userId);
+
+    // Check if user exists and has resumes
+    const resumes = await this.resumeRepository
+      .createQueryBuilder('resume')
+      .leftJoinAndSelect('resume.user', 'user')
+      .where('user.id = :userId', { userId })
+      .getMany();
+
+    console.log('Found resumes:', resumes.length);
+    console.log('Resumes data:', resumes);
+
+    return resumes;
   }
 
   async findOneById(id: number): Promise<Resume | null> {
@@ -35,12 +42,10 @@ export class ResumeService {
   }
 
   async update(id: number, data: Partial<Resume>): Promise<Resume> {
-    //get obj has info about update things (affected rows)
     const result = await this.resumeRepository.update(id, data);
     if (result.affected === 0) {
       throw new NotFoundException('Resume not found');
     }
-    //to get updated resume
     const updatedResume = await this.findOneById(id);
     if (!updatedResume) {
       throw new Error('Failed to get updated resume');

@@ -27,9 +27,10 @@ export class AuthService {
     throw new UnauthorizedException('Invalid credentials');
   }
 
-
   login(user: JwtUserPayload) {
     const payload = { username: user.username, sub: user.id };
+    console.log('Creating JWT with payload:', payload);
+
     return {
       access_token: this.jwtService.sign(payload),
     };
