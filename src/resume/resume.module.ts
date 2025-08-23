@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Resume } from './entity/resume.entity';
@@ -14,7 +15,7 @@ import { ProjectsModule } from './projects/projects.module';
   imports: [
     TypeOrmModule.forFeature([Resume]),
     UserModule,
-    //   circular dependencies
+    //   circular
     forwardRef(() => SkillsModule),
     forwardRef(() => EducationModule),
     forwardRef(() => ExperiencesModule),

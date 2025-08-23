@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Post,
@@ -6,13 +7,15 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ResumeService } from './resume.service';
 import { Resume } from './entity/resume.entity';
 import { UserService } from '../user/user.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('resume')
-// base route: /resume
 export class ResumeController {
   constructor(
     private readonly resumeService: ResumeService,
@@ -20,60 +23,78 @@ export class ResumeController {
   ) {}
 
   // Create Resume
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
+    @Request() req,
     @Body()
     body: {
       title: string;
       phone?: string;
       email?: string;
       summary?: string;
-      userId: number;
     },
   ): Promise<Resume> {
-    const user = await this.userService.findOneById(body.userId);
+    const userId = req.user.id;
+    const user = await this.userService.findOneById(userId);
     if (!user) throw new Error('User not found');
 
-    const resume = await this.resumeService.create({
-      title: body.title,
-      phone: body.phone,
-      email: body.email,
-      summary: body.summary,
-      user: user, // pass the full entity
+    return this.resumeService.create({
+      ...body,
+      user,
     });
-    return resume;
   }
 
-  // Get all resumes for one user
-  @Get('user/:userId')
-  async getByUserId(@Param('userId') userId: number): Promise<Resume[]> {
+  // Get my resumes
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMyResumes(@Request() req): Promise<Resume[]> {
+    const userId = req.user.id; // Changed from req.user.userId to req.user.id
     return this.resumeService.findByUserId(userId);
   }
 
-  //  one resume
+  // Get one resume
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async getOne(@Param('id') id: number): Promise<Resume | null> {
-    return this.resumeService.findOneById(id);
+  async getOne(@Request() req, @Param('id') id: number): Promise<Resume | null> {
+    const resume = await this.resumeService.findOneById(id);
+    if (!resume) return null;
+
+    if (resume.user.id !== req.user.id) {
+      throw new Error('Not authorized to access this resume');
+    }
+    return resume;
   }
 
-  // Update
+  // Update resume
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   async update(
+    @Request() req,
     @Param('id') id: number,
-    @Body()
-    body: {
-      title?: string;
-      phone?: string;
-      email?: string;
-      summary?: string;
-    },
+    @Body() body: Partial<Resume>,
   ): Promise<Resume> {
+    const resume = await this.resumeService.findOneById(id);
+    if (!resume) throw new Error('Resume not found');
+
+    if (resume.user.id !== req.user.id) {
+      throw new Error('Not authorized to update this resume');
+    }
+
     return this.resumeService.update(id, body);
   }
 
-  // Delete
+  // Delete resume
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async delete(@Param('id') id: number) {
+  async delete(@Request() req, @Param('id') id: number) {
+    const resume = await this.resumeService.findOneById(id);
+    if (!resume) throw new Error('Resume not found');
+
+    if (resume.user.id !== req.user.id) { // Changed from req.user.userId to req.user.id
+      throw new Error('Not authorized to delete this resume');
+    }
+
     return this.resumeService.delete(id);
   }
 }
