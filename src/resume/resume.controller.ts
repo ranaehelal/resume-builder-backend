@@ -39,7 +39,7 @@ export class ResumeController {
       phone: body.phone,
       email: body.email,
       summary: body.summary,
-      user: user,
+      user: user, // pass the full entity
     });
     return resume;
   }
