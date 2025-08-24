@@ -1,23 +1,24 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsEmail } from 'class-validator';
 
 export class CreateResumeDto {
-  @ApiProperty({ example: 'Senior Developer Resume' })
+  @ApiProperty({ example: 'Software Engineer Resume', description: 'Resume title' })
+  @IsNotEmpty()
   @IsString()
   title: string;
 
-  @ApiProperty({ example: '+201234567890', required: false })
+  @ApiProperty({ example: '+201234567890', description: 'Phone number', required: false })
   @IsOptional()
   @IsString()
   phone?: string;
 
-  @ApiProperty({ example: 'john@example.com', required: false })
+  @ApiProperty({ example: 'user@example.com', description: 'Email address', required: false })
   @IsOptional()
-  @IsString()
+  @IsEmail()
   email?: string;
 
-  @ApiProperty({ example: 'Experienced full-stack developer...', required: false })
+  @ApiProperty({ example: 'Experienced full-stack developer...', description: 'Summary', required: false })
   @IsOptional()
   @IsString()
   summary?: string;

@@ -1,42 +1,22 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty } from '@nestjs/swagger';
-import { Skill } from '../skills/entity/skills.entity';
-import { Experiences } from '../experiences/entity/experiences.entity';
-import { Education } from '../education/entity/education.entity';
-import { Certifications } from '../certifications/entity/certifications.entity';
-import { Projects } from '../projects/entity/projects.entity';
 
 export class ResumeResponseDto {
-  @ApiProperty()
+  @ApiProperty({ example: 1 })
   id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Software Engineer Resume' })
   title: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ example: '+201234567890', nullable: true })
   phone?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ example: 'user@example.com', nullable: true })
   email?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ example: 'Experienced full-stack developer...', nullable: true })
   summary?: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 5 })
   userId: number;
-
-  @ApiProperty({ type: () => [Skill] })
-  skills: Skill[];
-
-  @ApiProperty({ type: () => [Experiences] })
-  experiences: Experiences[];
-
-  @ApiProperty({ type: () => [Education] })
-  education: Education[];
-
-  @ApiProperty({ type: () => [Certifications] })
-  certifications: Certifications[];
-
-  @ApiProperty({ type: () => [Projects] })
-  projects: Projects[];
 }
