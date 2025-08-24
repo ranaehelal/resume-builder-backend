@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
+
 //TypeORM Repository has find one delete save and the user repo
 @Injectable()
 export class UserService {
@@ -26,17 +27,19 @@ export class UserService {
     });
   }
 
-  async findByEmail(email: string): Promise<RegisterDto | null> {
+  async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { email } });
   }
 
   findOneByUsername(username: string) {
     return this.usersRepository.findOneBy({ username });
   }
+
   deleteAll() {
     return this.usersRepository.delete({});
   }
-  async findOneById(id: number): Promise<RegisterDto | null> {
+
+  async findOneById(id: number): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { id },
     });
