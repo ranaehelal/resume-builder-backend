@@ -4,6 +4,9 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { ResumeModule } from './resume/resume.module';
 import { AuthModule } from './auth/auth.module';
+import { AiService } from './ai/ai.service';
+import { AiController } from './ai/ai.controller';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -25,6 +28,9 @@ import { AuthModule } from './auth/auth.module';
     UserModule,
     AuthModule,
     ResumeModule,
+    AiModule,
   ],
+  providers: [AiService],
+  controllers: [AiController],
 })
 export class AppModule {}

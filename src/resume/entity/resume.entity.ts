@@ -33,18 +33,19 @@ export class Resume {
   @ManyToOne(() => User, (user) => user.resumes)
   user: User;
 
-  @OneToMany(() => Skill, (skill) => skill.resume)
+  @OneToMany(() => Skill, (skill) => skill.resume, { cascade: true, eager: true })
   skills: Skill[];
 
-  @OneToMany(() => Certifications, (cert) => cert.resume)
+  @OneToMany(() => Certifications, (cert) => cert.resume, { cascade: true, eager: true })
   certifications: Certifications[];
 
-  @OneToMany(() => Education, (edu) => edu.resume)
+  @OneToMany(() => Education, (edu) => edu.resume, { cascade: true, eager: true })
   education: Education[];
 
-  @OneToMany(() => Experiences, (exp) => exp.resume)
+  @OneToMany(() => Experiences, (exp) => exp.resume, { cascade: true, eager: true })
   experiences: Experiences[];
 
-  @OneToMany(() => Projects, (proj) => proj.resume)
+  @OneToMany(() => Projects, (proj) => proj.resume, { cascade: true, eager: true })
   projects: Projects[];
+
 }

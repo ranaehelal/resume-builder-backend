@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Post,
@@ -6,10 +7,13 @@ import {
   Delete,
   Param,
   Body,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CertificationsService } from './certifications.service';
 import { Certifications } from './entity/certifications.entity';
 import { ResumeService } from '../resume.service';
+import { CreateCertificationDto } from './dto/create-certification.dto';
+import { UpdateCertificationDto } from './dto/update-certification.dto';
 
 @Controller('certifications')
 export class CertificationsController {
@@ -19,48 +23,33 @@ export class CertificationsController {
   ) {}
 
   @Post()
-  async create(
-    @Body()
-    body: {
-      name: string;
-      date: Date;
-      issuer: string;
-      url: string;
-      description?: string;
-      resumeId: number;
-    },
-  ): Promise<Certifications> {
-    const resume = await this.resumeService.findOneById(body.resumeId);
+  async create(@Body() createCertificationDto: CreateCertificationDto): Promise<Certifications> {
+    const resume = await this.resumeService.findOneById(createCertificationDto.resumeId);
     if (!resume) throw new Error('Resume not found');
 
-    const cert = await this.certificationsService.create({
-      name: body.name,
-      date: body.date,
-      issuer: body.issuer,
-      url: body.url,
-      description: body.description,
-      resume: resume,
+    return this.certificationsService.create({
+      ...createCertificationDto,
+      resume,
     });
-    return cert;
   }
 
   @Get('resume/:resumeId')
   async findByResumeId(
-    @Param('resumeId') resumeId: number,
+    @Param('resumeId', ParseIntPipe) resumeId: number,
   ): Promise<Certifications[]> {
     return this.certificationsService.findByResumeId(resumeId);
   }
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
-    @Body() body: Partial<Omit<Certifications, 'id' | 'resume'>>,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCertificationDto: UpdateCertificationDto,
   ): Promise<Certifications> {
-    return this.certificationsService.update(id, body);
+    return this.certificationsService.update(id, updateCertificationDto);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number) {
+  async delete(@Param('id', ParseIntPipe) id: number) {
     return this.certificationsService.delete(id);
   }
 }
