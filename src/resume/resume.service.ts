@@ -1,5 +1,3 @@
-// Enhanced resume.service.ts with debugging
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,28 +11,25 @@ export class ResumeService {
     private readonly resumeRepository: Repository<Resume>,
   ) {}
 
+  //Partial : can pass subset
   async create(resume: Partial<Resume>): Promise<Resume> {
-    const newResume = this.resumeRepository.create(resume);
-    return this.resumeRepository.save(newResume);
+    const newResume = this.resumeRepository.create(resume); //create in memory and have relations
+    return this.resumeRepository.save(newResume);// save in database
   }
 
-  async findByUserId(userId: number): Promise<Resume[]> {
-    console.log('Finding resumes for userId:', userId);
-
-    // Check if user exists and has resumes
+  async findAllResumesByUserId(userId: number): Promise<Resume[]> {
+    // check user exists and has resumes
     const resumes = await this.resumeRepository
       .createQueryBuilder('resume')
-      .leftJoinAndSelect('resume.user', 'user')
+      //find wont be easy to have filter by id
+      .leftJoinAndSelect('resume.user', 'user') //get all resumes even without users
       .where('user.id = :userId', { userId })
       .getMany();
-
-    console.log('Found resumes:', resumes.length);
-    console.log('Resumes data:', resumes);
 
     return resumes;
   }
 
-  async findOneById(id: number): Promise<Resume | null> {
+  async findOneResumeById(id: number): Promise<Resume | null> {
     return this.resumeRepository.findOne({
       where: { id },
       relations: ['user'],
@@ -44,11 +39,11 @@ export class ResumeService {
   async update(id: number, data: Partial<Resume>): Promise<Resume> {
     const result = await this.resumeRepository.update(id, data);
     if (result.affected === 0) {
-      throw new NotFoundException('Resume not found');
+      throw new NotFoundException('Resume not updated or not found');
     }
-    const updatedResume = await this.findOneById(id);
+    const updatedResume = await this.findOneResumeById(id);
     if (!updatedResume) {
-      throw new Error('Failed to get updated resume');
+      throw new Error("can't to get updated resume");
     }
     return updatedResume;
   }
