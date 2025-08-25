@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Projects } from './entity/projects.entity';
 import { ResumeService } from '../resume.service';
-
+import { NotFoundException } from '@nestjs/common';
 @Injectable()
 export class ProjectsService {
   constructor(
@@ -12,36 +12,43 @@ export class ProjectsService {
     private readonly resumeService: ResumeService,
   ) {}
 
-  async create(project: Partial<Projects>): Promise<Projects> {
-    if (!project.resume?.id) throw new Error('Resume ID is required');
+  async createProject(data: {
+    name: string;
+    date: string;
+    link: string;
+    description?: string;
+    resumeId: number;
+  }): Promise<Projects> {
+    const resume = await this.resumeService.findOneResumeById(data.resumeId);
+    if (!resume) throw new NotFoundException('Resume not found');
 
-    const resume = await this.resumeService.findOneById(project.resume.id);
-    if (!resume) throw new Error('Resume not found');
-
-    const newProject = this.projectsRepository.create({ ...project, resume });
-    return this.projectsRepository.save(newProject);
+    const project = this.projectsRepository.create({ ...data, resume });
+    return this.projectsRepository.save(project);
   }
 
-  async findByResumeId(resumeId: number): Promise<Projects[]> {
+  async findProjectsByResumeId(resumeId: number): Promise<Projects[]> {
     return this.projectsRepository.find({
       where: { resume: { id: resumeId } },
       relations: ['resume'],
     });
   }
 
-  async update(id: number, data: Partial<Projects>): Promise<Projects> {
+  async updateProject(id: number, data: Partial<Omit<Projects, 'id' | 'resume'>>): Promise<Projects> {
     const result = await this.projectsRepository.update(id, data);
-    if (result.affected === 0) throw new Error('Project not found');
+    if (result.affected === 0) throw new NotFoundException('Project not found');
 
     const updatedProject = await this.projectsRepository.findOne({
       where: { id },
       relations: ['resume'],
     });
-    if (!updatedProject) throw new Error('Project not found after update');
+    if (!updatedProject) throw new NotFoundException('Project not found after update');
+
     return updatedProject;
   }
 
-  async delete(id: number) {
-    return this.projectsRepository.delete(id);
+  async deleteProject(id: number) {
+    const result = await this.projectsRepository.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Project not found');
+    return { message: 'Project deleted successfully' };
   }
 }

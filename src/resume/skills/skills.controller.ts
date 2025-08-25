@@ -17,35 +17,22 @@ export class SkillsController {
     private readonly skillService: SkillService,
     private readonly resumeService: ResumeService,
   ) {}
-
   @Post()
-  async create(
-    @Body() body: { name: string; description?: string; resumeId: number },
-  ): Promise<Skill> {
-    const resume = await this.resumeService.findOneById(body.resumeId);
-    if (!resume) throw new Error('Resume not found');
-
-    const skill = await this.skillService.create({
-      name: body.name,
-      description: body.description,
-      resume: resume, // pass the full entity
-    });
-    return skill;
+  //create skill
+  async create(@Body() body: { name: string; description?: string; resumeId: number }): Promise<Skill> {
+    return this.skillService.createSkillWithResume(body.name, body.description, body.resumeId);
   }
-
+  //find skills by resume id
   @Get('resume/:resumeId')
   async findByResumeId(@Param('resumeId') resumeId: number): Promise<Skill[]> {
-    return this.skillService.findByResumeId(resumeId);
+    return this.skillService.findSkillByResumeId(resumeId);
   }
-
+  //update skill
   @Put(':id')
-  async update(
-    @Param('id') id: number,
-    @Body() body: { name?: string; description?: string },
-  ): Promise<Skill> {
-    return this.skillService.update(id, body);
+  async update(@Param('id') id: number, @Body() body: { name?: string; description?: string }): Promise<Skill> {
+    return this.skillService.updateSkill(id, body);
   }
-
+  //delete skill
   @Delete(':id')
   async delete(@Param('id') id: number) {
     return this.skillService.delete(id);

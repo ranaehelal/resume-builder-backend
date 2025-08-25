@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Certifications } from './entity/certifications.entity';
 import { ResumeService } from '../resume.service';
+import { CreateCertificationDto } from './dto/create-certification.dto';
+import { UpdateCertificationDto } from './dto/update-certification.dto';
 
 @Injectable()
 export class CertificationsService {
@@ -12,15 +14,12 @@ export class CertificationsService {
     private readonly resumeService: ResumeService,
   ) {}
 
-  async create(cert: Partial<Certifications>): Promise<Certifications> {
-    if (!cert.resume?.id) {
-      throw new Error('Resume ID is required');
-    }
-    const resume = await this.resumeService.findOneById(cert.resume.id);
-    if (!resume) throw new Error('Resume not found');
+  async createCertification(data: CreateCertificationDto): Promise<Certifications> {
+    const resume = await this.resumeService.findOneResumeById(data.resumeId);
+    if (!resume) throw new NotFoundException('Resume not found');
 
-    const newCert = this.certificationsRepository.create({ ...cert, resume });
-    return this.certificationsRepository.save(newCert);
+    const cert = this.certificationsRepository.create({ ...data, resume });
+    return this.certificationsRepository.save(cert);
   }
 
   async findByResumeId(resumeId: number): Promise<Certifications[]> {
@@ -30,22 +29,24 @@ export class CertificationsService {
     });
   }
 
-  async update(
+  async updateCertification(
     id: number,
-    data: Partial<Certifications>,
+    data: UpdateCertificationDto
   ): Promise<Certifications> {
     const result = await this.certificationsRepository.update(id, data);
-    if (result.affected === 0) throw new Error('Certification not found');
+    if (result.affected === 0) throw new NotFoundException('Certification not found');
 
     const updatedCert = await this.certificationsRepository.findOne({
       where: { id },
       relations: ['resume'],
     });
-    if (!updatedCert) throw new Error('Certification not found after update');
+    if (!updatedCert) throw new NotFoundException('Certification not found after update');
     return updatedCert;
   }
 
-  async delete(id: number) {
-    return this.certificationsRepository.delete(id);
+  async deleteCertification(id: number) {
+    const result = await this.certificationsRepository.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Certification not found');
+    return { message: 'Certification deleted successfully' };
   }
 }

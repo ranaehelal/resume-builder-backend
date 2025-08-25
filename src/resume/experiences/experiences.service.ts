@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Experiences } from './entity/experiences.entity';
@@ -12,13 +12,18 @@ export class ExperiencesService {
     private readonly resumeService: ResumeService,
   ) {}
 
-  async create(exp: Partial<Experiences>): Promise<Experiences> {
-    if (!exp.resume?.id) throw new Error('Resume ID is required');
-    const resume = await this.resumeService.findOneById(exp.resume.id);
-    if (!resume) throw new Error('Resume not found');
+  async createExperience(data: {
+    jobTitle: string;
+    company: string;
+    dateRange: string;
+    description?: string;
+    resumeId: number;
+  }): Promise<Experiences> {
+    const resume = await this.resumeService.findOneResumeById(data.resumeId);
+    if (!resume) throw new NotFoundException('Resume not found');
 
-    const newExp = this.experiencesRepository.create({ ...exp, resume });
-    return this.experiencesRepository.save(newExp);
+    const experience = this.experiencesRepository.create({ ...data, resume });
+    return this.experiencesRepository.save(experience);
   }
 
   async findByResumeId(resumeId: number): Promise<Experiences[]> {
@@ -28,19 +33,21 @@ export class ExperiencesService {
     });
   }
 
-  async update(id: number, data: Partial<Experiences>): Promise<Experiences> {
+  async updateExperience(id: number, data: Partial<Omit<Experiences, 'id' | 'resume'>>): Promise<Experiences> {
     const result = await this.experiencesRepository.update(id, data);
-    if (result.affected === 0) throw new Error('Experience not found');
+    if (result.affected === 0) throw new NotFoundException('Experience not found');
 
     const updatedExp = await this.experiencesRepository.findOne({
       where: { id },
       relations: ['resume'],
     });
-    if (!updatedExp) throw new Error('Experience not found after update');
+    if (!updatedExp) throw new NotFoundException('Experience not found after update');
     return updatedExp;
   }
 
-  async delete(id: number) {
-    return this.experiencesRepository.delete(id);
+  async deleteExperience(id: number) {
+    const result = await this.experiencesRepository.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Experience not found');
+    return { message: 'Experience deleted successfully' };
   }
 }

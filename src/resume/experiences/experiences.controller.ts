@@ -10,18 +10,15 @@ import {
 } from '@nestjs/common';
 import { ExperiencesService } from './experiences.service';
 import { Experiences } from './entity/experiences.entity';
-import { ResumeService } from '../resume.service';
 
 @Controller('experiences')
 export class ExperiencesController {
-  constructor(
-    private readonly experiencesService: ExperiencesService,
-    private readonly resumeService: ResumeService,
-  ) {}
+  constructor(private readonly experiencesService: ExperiencesService) {}
 
   @Post()
   async create(
-    @Body() body: {
+    @Body()
+    body: {
       jobTitle: string;
       company: string;
       dateRange: string;
@@ -29,22 +26,11 @@ export class ExperiencesController {
       resumeId: number;
     },
   ): Promise<Experiences> {
-    const resume = await this.resumeService.findOneById(body.resumeId);
-    if (!resume) throw new Error('Resume not found');
-
-    const exp = await this.experiencesService.create({
-      jobTitle: body.jobTitle,
-      company: body.company,
-      dateRange: body.dateRange,
-      description: body.description,
-      resume: resume,
-    });
-    return exp;
+    return this.experiencesService.createExperience(body);
   }
 
   @Get('resume/:resumeId')
-  // eslint-disable-next-line prettier/prettier
-  async findByResumeId(@Param('resumeId') resumeId: number): Promise<Experiences[]> {
+  async findExperiencesByResumeId(@Param('resumeId') resumeId: number): Promise<Experiences[]> {
     return this.experiencesService.findByResumeId(resumeId);
   }
 
@@ -53,11 +39,11 @@ export class ExperiencesController {
     @Param('id') id: number,
     @Body() body: Partial<Omit<Experiences, 'id' | 'resume'>>,
   ): Promise<Experiences> {
-    return this.experiencesService.update(id, body);
+    return this.experiencesService.updateExperience(id, body);
   }
 
   @Delete(':id')
   async delete(@Param('id') id: number) {
-    return this.experiencesService.delete(id);
+    return this.experiencesService.deleteExperience(id);
   }
 }
