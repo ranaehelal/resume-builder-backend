@@ -16,6 +16,8 @@ import { ProjectsModule } from './projects/projects.module';
     TypeOrmModule.forFeature([Resume]),
     UserModule,
     //   circular
+    // using forwardRef because SkillsModule imports ResumeModule
+
     forwardRef(() => SkillsModule),
     forwardRef(() => EducationModule),
     forwardRef(() => ExperiencesModule),
