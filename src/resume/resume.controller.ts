@@ -38,7 +38,7 @@ export class ResumeController {
   ): Promise<Resume> {
 
     const userId = req.user.id;
-    const user = await this.userService.findOneById(userId);
+    const user = await this.userService.findOneUserById(userId);
     if (!user) throw new NotFoundException("can't find user");
 
     return this.resumeService.create({

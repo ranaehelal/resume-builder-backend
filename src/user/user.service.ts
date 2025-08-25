@@ -39,7 +39,7 @@ export class UserService {
     return this.usersRepository.delete({});
   }
 
-  async findOneById(id: number): Promise<User | null> {
+  async findOneUserById(id: number): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { id },
     });
