@@ -63,24 +63,13 @@ A robust NestJS-powered backend API for a resume builder application with JWT au
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/ranaehelal/resume-builder-backend
 cd resume-builder-backend
 ```
 
 2. Install dependencies:
 ```bash
 npm install
-```
-
-3. Required packages:
-```bash
-npm install @nestjs/core @nestjs/common @nestjs/platform-express
-npm install @nestjs/typeorm typeorm
-npm install @nestjs/jwt @nestjs/passport passport passport-jwt
-npm install @nestjs/swagger swagger-ui-express
-npm install class-validator class-transformer
-npm install bcrypt
-npm install pg # for PostgreSQL or mysql2 for MySQL
 ```
 
 ## Configuration
@@ -109,24 +98,6 @@ AI_API_KEY=your-ai-api-key
 AI_SERVICE_URL=https://your-ai-service.com/api
 ```
 
-### Database Configuration
-Update your database configuration in `app.module.ts`:
-
-```typescript
-TypeOrmModule.forRoot({
-  type: 'postgres', // or 'mysql'
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT),
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  entities: [User, Resume, Skill, /* other entities */],
-  synchronize: true, // disable in production
-}),
-```
-
-
-
 ## Development
 
 ### Running the Application
@@ -137,72 +108,7 @@ npm run start:dev
 # Production mode
 npm run start:prod
 
-# Debug mode
-npm run start:debug
 ```
-
-### Database Operations
-```bash
-# Generate migration
-npm run typeorm:generate-migration -- MigrationName
-
-# Run migrations
-npm run typeorm:run-migrations
-
-# Revert migration
-npm run typeorm:revert-migration
-```
-
-
-
-## Security Features
-
-### JWT Authentication
-- Secure token generation with configurable expiration
-- Bearer token extraction from Authorization header
-- Protected route validation with guards
-- User context injection in protected endpoints
-
-### Password Security
-- bcrypt hashing with salt rounds
-- Password validation requirements
-- Secure password comparison
-
-### Data Validation
-- DTO-based request validation
-- Input sanitization with class-validator
-- Type safety with TypeScript
-- Required field validation
-
-### Authorization
-- User-specific resource access control
-- Resume ownership validation
-- Cascade delete protection
-- SQL injection prevention with TypeORM
-
-## Error Handling
-
-### Exception Filters
-- Global exception handling
-- Standardized error responses
-- HTTP status code mapping
-- Validation error formatting
-
-### Common Error Responses
-```typescript
-// 401 Unauthorized
-{ message: "Invalid credentials" }
-
-// 404 Not Found  
-{ message: "Resume not found" }
-
-// 400 Bad Request
-{ message: "Validation failed", errors: [...] }
-
-// 403 Forbidden
-{ message: "User not authorized to access this resume" }
-```
-
 
 
 ## API Documentation
